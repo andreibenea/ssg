@@ -44,3 +44,17 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
     print(f"delimiter output:\n{new_nodes}")
     return new_nodes
+
+
+def extract_markdown_images(input):
+    # expression = "\!\[(.+?)\]\((.+?)\)"
+    expression = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
+    matches = re.findall(expression, input)
+    return matches
+
+
+def extract_markdown_links(input):
+    # expression = "\[(.+?)\]\((.+?)\)"
+    expression = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
+    matches = re.findall(expression, input)
+    return matches

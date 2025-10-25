@@ -1,0 +1,156 @@
+size of initial nodes array: 1
+checking out node: TextNode('This is **bold**, then _italic_, and finally `code`.', <TextType.TEXT: 'text'>, None)
+set delimiter: `
+node text to split: This is **bold**, then _italic_, and finally `code`.
+text slices: ['This is **bold**, then _italic_, and finally ', 'code', '.']
+added TextNode('This is **bold**, then _italic_, and finally ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('code', <TextType.CODE: 'code'>, None)
+special flag now: False
+added TextNode('.', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('This is **bold**, then _italic_, and finally ', <TextType.TEXT: 'text'>, None), TextNode('code', <TextType.CODE: 'code'>, None), TextNode('.', <TextType.TEXT: 'text'>, None)]
+size of initial nodes array: 3
+checking out node: TextNode('This is **bold**, then _italic_, and finally ', <TextType.TEXT: 'text'>, None)
+set delimiter: **
+node text to split: This is **bold**, then _italic_, and finally 
+text slices: ['This is ', 'bold', ', then _italic_, and finally ']
+added TextNode('This is ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('bold', <TextType.BOLD: 'bold'>, None)
+special flag now: False
+added TextNode(', then _italic_, and finally ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+checking out node: TextNode('code', <TextType.CODE: 'code'>, None)
+set delimiter: **
+node type not text..adding node as is
+checking out node: TextNode('.', <TextType.TEXT: 'text'>, None)
+set delimiter: **
+node text to split: .
+text slices: ['.']
+added TextNode('.', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('This is ', <TextType.TEXT: 'text'>, None), TextNode('bold', <TextType.BOLD: 'bold'>, None), TextNode(', then _italic_, and finally ', <TextType.TEXT: 'text'>, None), TextNode('code', <TextType.CODE: 'code'>, None), TextNode('.', <TextType.TEXT: 'text'>, None)]
+size of initial nodes array: 5
+checking out node: TextNode('This is ', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+node text to split: This is 
+text slices: ['This is ']
+added TextNode('This is ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+checking out node: TextNode('bold', <TextType.BOLD: 'bold'>, None)
+set delimiter: _
+node type not text..adding node as is
+checking out node: TextNode(', then _italic_, and finally ', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+node text to split: , then _italic_, and finally 
+text slices: [', then ', 'italic', ', and finally ']
+added TextNode(', then ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('italic', <TextType.ITALIC: 'italic'>, None)
+special flag now: False
+added TextNode(', and finally ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+checking out node: TextNode('code', <TextType.CODE: 'code'>, None)
+set delimiter: _
+node type not text..adding node as is
+checking out node: TextNode('.', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+node text to split: .
+text slices: ['.']
+added TextNode('.', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('This is ', <TextType.TEXT: 'text'>, None), TextNode('bold', <TextType.BOLD: 'bold'>, None), TextNode(', then ', <TextType.TEXT: 'text'>, None), TextNode('italic', <TextType.ITALIC: 'italic'>, None), TextNode(', and finally ', <TextType.TEXT: 'text'>, None), TextNode('code', <TextType.CODE: 'code'>, None), TextNode('.', <TextType.TEXT: 'text'>, None)]
+size of initial nodes array: 1
+checking out node: TextNode('Looking for _an exception', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+size of initial nodes array: 1
+checking out node: TextNode('The thing is _at the end_', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+node text to split: The thing is _at the end_
+text slices: ['The thing is ', 'at the end', '']
+added TextNode('The thing is ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('at the end', <TextType.ITALIC: 'italic'>, None)
+special flag now: False
+delimiter output:
+[TextNode('The thing is ', <TextType.TEXT: 'text'>, None), TextNode('at the end', <TextType.ITALIC: 'italic'>, None)]
+size of initial nodes array: 3
+checking out node: TextNode('Looking for **Baldie** now', <TextType.TEXT: 'text'>, None)
+set delimiter: **
+node text to split: Looking for **Baldie** now
+text slices: ['Looking for ', 'Baldie', ' now']
+added TextNode('Looking for ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('Baldie', <TextType.BOLD: 'bold'>, None)
+special flag now: False
+added TextNode(' now', <TextType.TEXT: 'text'>, None)
+special flag now: True
+checking out node: TextNode('Looking for _an_ italian', <TextType.ITALIC: 'italic'>, None)
+set delimiter: **
+node type not text..adding node as is
+checking out node: TextNode('ComeClickMe!', <TextType.LINK: 'link'>, 'https://www.something.com')
+set delimiter: **
+node type not text..adding node as is
+delimiter output:
+[TextNode('Looking for ', <TextType.TEXT: 'text'>, None), TextNode('Baldie', <TextType.BOLD: 'bold'>, None), TextNode(' now', <TextType.TEXT: 'text'>, None), TextNode('Looking for _an_ italian', <TextType.ITALIC: 'italic'>, None), TextNode('ComeClickMe!', <TextType.LINK: 'link'>, 'https://www.something.com')]
+size of initial nodes array: 1
+checking out node: TextNode('This one has no delimiter', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+node text to split: This one has no delimiter
+text slices: ['This one has no delimiter']
+added TextNode('This one has no delimiter', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('This one has no delimiter', <TextType.TEXT: 'text'>, None)]
+size of initial nodes array: 3
+checking out node: TextNode('This is node nr. one', <TextType.TEXT: 'text'>, None)
+set delimiter: **
+node text to split: This is node nr. one
+text slices: ['This is node nr. one']
+added TextNode('This is node nr. one', <TextType.TEXT: 'text'>, None)
+special flag now: True
+checking out node: TextNode('This is number **two**!', <TextType.BOLD: 'bold'>, None)
+set delimiter: **
+node type not text..adding node as is
+checking out node: TextNode('This is **three** now.', <TextType.TEXT: 'text'>, None)
+set delimiter: **
+node text to split: This is **three** now.
+text slices: ['This is ', 'three', ' now.']
+added TextNode('This is ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('three', <TextType.BOLD: 'bold'>, None)
+special flag now: False
+added TextNode(' now.', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('This is node nr. one', <TextType.TEXT: 'text'>, None), TextNode('This is number **two**!', <TextType.BOLD: 'bold'>, None), TextNode('This is ', <TextType.TEXT: 'text'>, None), TextNode('three', <TextType.BOLD: 'bold'>, None), TextNode(' now.', <TextType.TEXT: 'text'>, None)]
+size of initial nodes array: 1
+checking out node: TextNode('This is text with a `code block` word', <TextType.TEXT: 'text'>, None)
+set delimiter: `
+node text to split: This is text with a `code block` word
+text slices: ['This is text with a ', 'code block', ' word']
+added TextNode('This is text with a ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('code block', <TextType.CODE: 'code'>, None)
+special flag now: False
+added TextNode(' word', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('This is text with a ', <TextType.TEXT: 'text'>, None), TextNode('code block', <TextType.CODE: 'code'>, None), TextNode(' word', <TextType.TEXT: 'text'>, None)]
+size of initial nodes array: 1
+checking out node: TextNode('Its _type_ will be italic', <TextType.TEXT: 'text'>, None)
+set delimiter: _
+node text to split: Its _type_ will be italic
+text slices: ['Its ', 'type', ' will be italic']
+added TextNode('Its ', <TextType.TEXT: 'text'>, None)
+special flag now: True
+added TextNode('type', <TextType.ITALIC: 'italic'>, None)
+special flag now: False
+added TextNode(' will be italic', <TextType.TEXT: 'text'>, None)
+special flag now: True
+delimiter output:
+[TextNode('Its ', <TextType.TEXT: 'text'>, None), TextNode('type', <TextType.ITALIC: 'italic'>, None), TextNode(' will be italic', <TextType.TEXT: 'text'>, None)]
