@@ -1,8 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType
-from convert_txt_to_html import text_node_to_html_node
-from node_helper import *
+from node_helper import extract_markdown_links, extract_markdown_images
 
 
 class TestHelper(unittest.TestCase):
