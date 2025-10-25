@@ -83,8 +83,8 @@ class TestTextNode(unittest.TestCase):
 
     def test_delimiter_invalid(self):
         node = TextNode("Looking for _an exception", TextType.TEXT)
-        new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
-        self.assertRaises(Exception, new_nodes)
+        with self.assertRaises(Exception):
+            new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
 
     def test_delimiter_multiple_nodes(self):
         expected_nodes = [
@@ -92,17 +92,66 @@ class TestTextNode(unittest.TestCase):
             TextNode("Baldie", TextType.BOLD),
             TextNode(" now", TextType.TEXT),
             TextNode("Looking for _an_ italian", TextType.ITALIC),
+            TextNode("ComeClickMe!", TextType.LINK, "https://www.something.com"),
         ]
         node_one = TextNode("Looking for **Baldie** now", TextType.TEXT)
         node_two = TextNode("Looking for _an_ italian", TextType.ITALIC)
-        # node_three = TextNode("Looking for **another problem", TextType.TEXT)
+        node_three = TextNode(
+            "ComeClickMe!", TextType.LINK, "https://www.something.com"
+        )
         new_nodes = split_nodes_delimiter(
-            [node_one, node_two], "**", TextType.BOLD
+            [node_one, node_two, node_three], "**", TextType.BOLD
         )
         self.assertEqual(new_nodes, expected_nodes)
 
     def test_delimiter_last_char_is_delimiter(self):
-        pass
+        expected_nodes = [
+            TextNode("The thing is ", TextType.TEXT),
+            TextNode("at the end", TextType.ITALIC),
+        ]
+        node = TextNode("The thing is _at the end_", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_delimiter_no_delimiter(self):
+        expected_nodes = [TextNode("This one has no delimiter", TextType.TEXT)]
+        node = TextNode("This one has no delimiter", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_delimiter_series(self):
+        expected_nodes = [
+            TextNode("This is node nr. one", TextType.TEXT),
+            TextNode("This is number **two**!", TextType.BOLD),
+            TextNode("This is ", TextType.TEXT),
+            TextNode("three", TextType.BOLD),
+            TextNode(" now.", TextType.TEXT),
+        ]
+        node_one = TextNode("This is node nr. one", TextType.TEXT)
+        node_two = TextNode("This is number **two**!", TextType.BOLD)
+        node_three = TextNode("This is **three** now.", TextType.TEXT)
+        new_nodes = split_nodes_delimiter(
+            [node_one, node_two, node_three], "**", TextType.BOLD
+        )
+        self.assertEqual(new_nodes, expected_nodes)
+
+    def test_delimiter_combo(self):
+        expected_nodes = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(", then ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(", and finally ", TextType.TEXT),
+            TextNode("code", TextType.CODE),
+            TextNode(".", TextType.TEXT),
+        ]
+        combo_node = TextNode(
+            "This is **bold**, then _italic_, and finally `code`.", TextType.TEXT
+        )
+        new_nodes = split_nodes_delimiter([combo_node], "`", TextType.CODE)
+        new_nodes = split_nodes_delimiter(new_nodes, "**", TextType.BOLD)
+        new_nodes = split_nodes_delimiter(new_nodes, "_", TextType.ITALIC)
+        self.assertEqual(new_nodes, expected_nodes)
 
 
 if __name__ == "__main__":
