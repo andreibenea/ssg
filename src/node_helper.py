@@ -46,10 +46,48 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     return new_nodes
 
 
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        print(f"parsing node: {node}")
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            print("Not a TXT node..adding as is")
+        print(f"text to extract img from: {node.text}")
+        images = extract_markdown_images(node.text)
+        if images:
+            txt_to_process = node.text
+            for image in images:
+                if len(txt_to_process) == 0:
+                    break
+                expression = f"![{image[0]}]({image[1]})"
+                left, right = txt_to_process.split(expression, 1)
+                print(f"left_split: {left}")
+                print(f"right_split: {right}")
+                if len(left) != 0:
+                    new_node = TextNode(left, TextType.TEXT)
+                    print(f"adding left as node: {new_node}")
+                    new_nodes.append(new_node)
+                new_node = TextNode(image[0], TextType.IMAGE, image[1])
+                new_nodes.append(new_node)
+                print(f"adding image as node: {new_node}")
+                txt_to_process = right
+
+        # links = extract_markdown_links(node)
+
+    print(new_nodes)
+    return new_nodes
+
+
+def split_nodes_link(old_nodes):
+    pass
+
+
 def extract_markdown_images(input):
     # expression = "\!\[(.+?)\]\((.+?)\)"
     expression = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(expression, input)
+    print(f"extr imgs returns: ")
     return matches
 
 
@@ -57,4 +95,5 @@ def extract_markdown_links(input):
     # expression = "\[(.+?)\]\((.+?)\)"
     expression = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(expression, input)
+    print(f"extr urls returns: ")
     return matches
