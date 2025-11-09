@@ -53,34 +53,72 @@ def split_nodes_image(old_nodes):
         if node.text_type != TextType.TEXT:
             new_nodes.append(node)
             print("Not a TXT node..adding as is")
+            continue
         print(f"text to extract img from: {node.text}")
         images = extract_markdown_images(node.text)
-        if images:
-            txt_to_process = node.text
-            for image in images:
-                if len(txt_to_process) == 0:
-                    break
-                expression = f"![{image[0]}]({image[1]})"
-                left, right = txt_to_process.split(expression, 1)
-                print(f"left_split: {left}")
-                print(f"right_split: {right}")
-                if len(left) != 0:
-                    new_node = TextNode(left, TextType.TEXT)
-                    print(f"adding left as node: {new_node}")
-                    new_nodes.append(new_node)
-                new_node = TextNode(image[0], TextType.IMAGE, image[1])
+        if not images:
+            new_nodes.append(node)
+            continue
+        txt_to_process = node.text
+        for image in images:
+            if len(txt_to_process) == 0:
+                break
+            expression = f"![{image[0]}]({image[1]})"
+            left, right = txt_to_process.split(expression, 1)
+            print(f"left_split: {left}")
+            print(f"right_split: {right}")
+            if len(left) != 0:
+                new_node = TextNode(left, TextType.TEXT)
+                print(f"adding left as node: {new_node}")
                 new_nodes.append(new_node)
-                print(f"adding image as node: {new_node}")
-                txt_to_process = right
-
-        # links = extract_markdown_links(node)
-
-    print(new_nodes)
+            new_node = TextNode(image[0], TextType.IMAGE, image[1])
+            new_nodes.append(new_node)
+            print(f"adding image as node: {new_node}")
+            txt_to_process = right
+        if len(txt_to_process) != 0:
+            new_node = TextNode(txt_to_process, TextType.TEXT)
+            print(f"adding remainder: {txt_to_process}")
+            new_nodes.append(new_node)
+    print(f"resulting list:\n{new_nodes}")
     return new_nodes
 
 
 def split_nodes_link(old_nodes):
-    pass
+    new_nodes = []
+    for node in old_nodes:
+        print(f"parsing node: {node}")
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            print("Not type text. Adding as is..")
+            continue
+        print(f"text to extract url from: {node.text}")
+        urls = extract_markdown_links(node.text)
+        if not urls:
+            print(f"no urls found, adding as is..")
+            new_nodes.append(node)
+            continue
+        txt_to_process = node.text
+        for url in urls:
+            if len(txt_to_process) == 0:
+                break
+            expression = f"[{url[0]}]({url[1]})"
+            left, right = txt_to_process.split(expression, 1)
+            print(f"left_split: {left}")
+            print(f"right_split: {right}")
+            if len(left) != 0:
+                new_node = TextNode(left, TextType.TEXT)
+                print(f"adding left as node: {new_node}")
+                new_nodes.append(new_node)
+            new_node = TextNode(url[0], TextType.LINK, url[1])
+            new_nodes.append(new_node)
+            print(f"adding link as node: {new_node}")
+            txt_to_process = right
+        if len(txt_to_process) != 0:
+            new_node = TextNode(txt_to_process, TextType.TEXT)
+            print(f"adding remainder: {txt_to_process}")
+            new_nodes.append(new_node)
+    print(f"resulting list:\n{new_nodes}")
+    return new_nodes
 
 
 def extract_markdown_images(input):
