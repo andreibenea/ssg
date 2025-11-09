@@ -102,3 +102,13 @@ class TestHelper(unittest.TestCase):
             ],
             new_nodes,
         )
+
+    def test_split_links_link_only_node(self):
+        node = TextNode(
+            "[to boot dev](https://www.boot.dev)",
+            TextType.TEXT,
+        )
+        new_nodes = split_nodes_link([node])
+        self.assertListEqual(
+            [TextNode("to boot dev", TextType.LINK, "https://www.boot.dev")], new_nodes
+        )
