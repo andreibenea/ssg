@@ -9,6 +9,21 @@ class Delimiters(Enum):
     CODE = "`"
 
 
+def text_to_textnodes(text):
+    node = TextNode(text, TextType.TEXT)
+    split_bold = split_nodes_delimiter([node], Delimiters.BOLD.value, TextType.BOLD)
+    split_italic = split_nodes_delimiter(
+        split_bold, Delimiters.ITALIC.value, TextType.ITALIC
+    )
+    split_code = split_nodes_delimiter(
+        split_italic, Delimiters.CODE.value, TextType.CODE
+    )
+    split_images = split_nodes_image(split_code)
+    split_urls = split_nodes_link(split_images)
+    print(f"final result:\n{split_urls}")
+    return split_urls
+
+
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     print(f"size of initial nodes array: {len(old_nodes)}")
@@ -122,7 +137,6 @@ def split_nodes_link(old_nodes):
 
 
 def extract_markdown_images(input):
-    # expression = "\!\[(.+?)\]\((.+?)\)"
     expression = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(expression, input)
     print(f"extr imgs returns: ")
@@ -130,7 +144,6 @@ def extract_markdown_images(input):
 
 
 def extract_markdown_links(input):
-    # expression = "\[(.+?)\]\((.+?)\)"
     expression = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     matches = re.findall(expression, input)
     print(f"extr urls returns: ")
