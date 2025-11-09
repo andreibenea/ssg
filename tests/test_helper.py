@@ -7,6 +7,7 @@ from node_helper import (
     split_nodes_image,
     split_nodes_link,
     text_to_textnodes,
+    markdown_to_blocks,
 )
 
 
@@ -245,4 +246,133 @@ class TestHelper(unittest.TestCase):
                 TextNode(".", TextType.TEXT),
             ],
             new_nodes,
+        )
+
+    def test_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_markdown_to_blocks_single_paragraph(self):
+        md = "Just a single paragraph with **bold** and _italic_."
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            ["Just a single paragraph with **bold** and _italic_."],
+        )
+
+    def test_markdown_to_blocks_two_paragraphs(self):
+        md = """First paragraph with a [link](https://boot.dev).
+
+    Second paragraph with `code`."""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "First paragraph with a [link](https://boot.dev).",
+                "Second paragraph with `code`.",
+            ],
+        )
+
+    def test_markdown_to_blocks_list_only(self):
+        md = """- one
+- two
+- three"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            ["- one\n- two\n- three"],
+        )
+
+    def test_markdown_to_blocks_para_then_list_then_para(self):
+        md = """Intro paragraph with **context**.
+
+- item A
+- item B
+- item C
+
+Closing paragraph with _emphasis_."""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "Intro paragraph with **context**.",
+                "- item A\n- item B\n- item C",
+                "Closing paragraph with _emphasis_.",
+            ],
+        )
+
+    def test_markdown_to_blocks_three_line_paragraph(self):
+        md = """This paragraph
+spans multiple
+lines with `code` and **bold**."""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            ["This paragraph\nspans multiple\nlines with `code` and **bold**."],
+        )
+
+    def test_markdown_to_blocks_heading_and_paragraph(self):
+        md = """# Title
+
+    This is the body under the title."""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "# Title",
+                "This is the body under the title.",
+            ],
+        )
+
+    def test_markdown_to_blocks_leading_and_trailing_blank_lines(self):
+        md = """
+
+    First block text.
+
+    Second block text.
+
+    """
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "First block text.",
+                "Second block text.",
+            ],
+        )
+
+    def test_markdown_to_blocks_extra_blank_lines_are_ignored(self):
+        # Even though "well-written" uses a single blank line, ensure robustness.
+        md = """Para 1.
+
+
+    Para 2.
+
+
+
+    Para 3."""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "Para 1.",
+                "Para 2.",
+                "Para 3.",
+            ],
         )

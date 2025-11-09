@@ -9,6 +9,17 @@ class Delimiters(Enum):
     CODE = "`"
 
 
+def markdown_to_blocks(markdown):
+    block_list = []
+    blocks = str(markdown).split("\n\n")
+    for block in blocks:
+        if len(block.strip()) == 0:
+            continue
+        block_list.append(block.strip())
+    print(f"COPYBLOCKLIST##############{block_list}")
+    return block_list
+
+
 def text_to_textnodes(text):
     node = TextNode(text, TextType.TEXT)
     split_bold = split_nodes_delimiter([node], Delimiters.BOLD.value, TextType.BOLD)
