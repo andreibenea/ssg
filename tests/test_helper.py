@@ -1,6 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
+from node_helper import BlockType
 from node_helper import (
     extract_markdown_links,
     extract_markdown_images,
@@ -8,6 +9,7 @@ from node_helper import (
     split_nodes_link,
     text_to_textnodes,
     markdown_to_blocks,
+    block_to_block_type,
 )
 
 
@@ -376,3 +378,57 @@ lines with `code` and **bold**."""
                 "Para 3.",
             ],
         )
+
+    def test_block_to_block_type_paragraph(self):
+        block = "Learning **Python** opens up endless possibilities — from _automation_ and data analysis to web apps and AI — all starting with a simple `print('Hello, world!')`."
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.PARAGRAPH)
+
+    def test_block_to_block_type_heading(self):
+        block = "## This is a Level 2 Heading"
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_block_to_block_type_heading_max(self):
+        block = "###### This is a Level 6 Heading"
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_block_to_block_type_code(self):
+        block = "```This is a code block```"
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.CODE)
+
+    def test_block_to_block_type_code_invalid(self):
+        block = "```This is NOT a code block"
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.PARAGRAPH)
+
+    def test_block_to_block_type_quote(self):
+        block = "> 'The only way to learn a new programming language is by writing programs in it.' — Dennis Ritchie"
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.QUOTE)
+
+    def test_block_to_block_type_unordered_list(self):
+        block = """- Apples  
+- Bananas  
+- Cherries
+"""
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.UNORDERED_LIST)
+
+    def test_block_to_block_type_ordered_list(self):
+        block = """1. Install Python  
+2. Write your first script  
+3. Run and debug your code
+"""
+        block_type = block_to_block_type(block)
+        print(block_type)
+        self.assertEqual(block_type, BlockType.ORDERED_LIST)

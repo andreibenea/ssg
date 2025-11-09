@@ -9,6 +9,15 @@ class Delimiters(Enum):
     CODE = "`"
 
 
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
+
+
 def markdown_to_blocks(markdown):
     block_list = []
     blocks = str(markdown).split("\n\n")
@@ -18,6 +27,41 @@ def markdown_to_blocks(markdown):
         block_list.append(block.strip())
     print(f"COPYBLOCKLIST##############{block_list}")
     return block_list
+
+
+def block_to_block_type(block):
+    print(f"PARSING BLOCK: {block}")
+    if len(block) == 0:
+        return ""
+    print(block[0])
+    match str(block[0]):
+        case "#":
+            heading_counter = 1
+            for i in range(1, 7):
+                if block[i] == "#":
+                    heading_counter += 1
+                elif block[i] == " ":
+                    return BlockType.HEADING
+                else:
+                    break
+            return BlockType.PARAGRAPH
+        case "`":
+            code_start = str(block).find("```")
+            code_end = str(block).rfind("```")
+            if code_end > code_start:
+                return BlockType.CODE
+            return BlockType.PARAGRAPH
+        case ">":
+            return BlockType.QUOTE
+        case "-":
+            return BlockType.UNORDERED_LIST
+        case "1":
+            num_start = str(block).find("1. ")
+            if num_start == 0:
+                return BlockType.ORDERED_LIST
+            return BlockType.PARAGRAPH
+        case _:
+            return BlockType.PARAGRAPH
 
 
 def text_to_textnodes(text):
