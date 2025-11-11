@@ -1,6 +1,8 @@
 from enum import Enum
 import re
 from textnode import TextNode, TextType
+from htmlnode import HTMLNode, ParentNode, LeafNode
+from convert_txt_to_html import text_node_to_html_node
 
 
 class Delimiters(Enum):
@@ -18,6 +20,90 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered_list"
 
 
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    all_nodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+
+        if block_type == BlockType.CODE:
+            print(f"FOUND CODE TYPE")
+            clean_block = block.replace("```", "")
+            clean_block = clean_block.lstrip("\n")
+            print(f"CLEAN BLOCK: {clean_block}")
+            new_node = TextNode(clean_block, TextType.CODE)
+            html_node = text_node_to_html_node(new_node)
+            new_node = ParentNode("pre", [html_node])
+            all_nodes.append(new_node)
+        else:
+            # block = block.replace("\n", " ")
+            nodes_in_block = text_to_textnodes(block)
+            child_nodes = []
+            for node in nodes_in_block:
+                print(f"node in block: {node}")
+                html_node = text_node_to_html_node(node)
+                child_nodes.append(html_node)
+            print(f"children: {child_nodes}")
+            match block_type:
+                case BlockType.PARAGRAPH:
+                    for child in child_nodes:
+                        print(f"CHILD: {child}")
+                        child.value = child.value.replace("\n", " ")
+                    new_node = ParentNode("p", child_nodes)
+                    print(f"RETURNING HTMLNODE: {new_node}")
+                    print(f"TOHTML{new_node.to_html()}")
+                    all_nodes.append(new_node)
+                case BlockType.HEADING:
+                    print(f"FOUND HEADING TYPE")
+                    print(f"heading block: {block}")
+                    count = str(block).count("#", 0, 6)
+                    print(f"heading level: {count}")
+                    block = block[count:].lstrip()
+                    print(f"heading block: {block}")
+                    for child in child_nodes:
+                        child.value = child.value[count:].lstrip()
+                    new_node = ParentNode(f"h{count}", child_nodes)
+                    print(f"RETURNING HTMLNODE: {new_node}")
+                    print(f"TOHTML{new_node.to_html()}")
+                    all_nodes.append(new_node)
+                case BlockType.QUOTE:
+                    print("FOUND QUOTE TYPE")
+                    for child in child_nodes:
+                        child.value = (child.value.replace("> ", "")).replace("\n", " ")
+                    p_node = ParentNode("p", child_nodes)
+                    new_node = ParentNode("blockquote", [p_node])
+                    all_nodes.append(new_node)
+                case BlockType.ORDERED_LIST:
+                    print("FOUND ORDERED LIST TYPE")
+                    lines = str(block).splitlines()
+                    child_nodes = []
+                    for i in range(len(lines)):
+                        if len(lines[i]) == 0:
+                            continue
+                        line = LeafNode("li", lines[i][2:].strip())
+                        child_nodes.append(line)
+                    new_node = ParentNode("ol", child_nodes)
+                    all_nodes.append(new_node)
+
+                case BlockType.UNORDERED_LIST:
+                    print("FOUND UNORDERED LIST TYPE")
+                    print(f"UL block: {block}")
+                    lines = str(block).split("- ")
+                    print(f"UL LINES: {lines}")
+                    child_nodes = []
+                    for line in lines:
+                        if len(line) == 0:
+                            continue
+                        line = LeafNode("li", line.strip())
+                        child_nodes.append(line)
+                    new_node = ParentNode("ul", child_nodes)
+                    all_nodes.append(new_node)
+
+    div_node = ParentNode("div", all_nodes)
+    print(f"#################FINAL DIV NODE: {div_node.to_html()}")
+    return div_node
+
+
 def markdown_to_blocks(markdown):
     block_list = []
     blocks = str(markdown).split("\n\n")
@@ -25,15 +111,15 @@ def markdown_to_blocks(markdown):
         if len(block.strip()) == 0:
             continue
         block_list.append(block.strip())
-    print(f"COPYBLOCKLIST##############{block_list}")
+    print(f"BLOCKLIST##############{block_list}")
     return block_list
 
 
 def block_to_block_type(block):
-    print(f"PARSING BLOCK: {block}")
+    print(f"PARSING BLOCK:\n{block}")
     if len(block) == 0:
         return ""
-    print(block[0])
+    print(f"first char: {block[0]}")
     match str(block[0]):
         case "#":
             heading_counter = 1
@@ -54,13 +140,24 @@ def block_to_block_type(block):
         case ">":
             return BlockType.QUOTE
         case "-":
+            block = block.strip()
+            lines = str(block).split("\n")
+            print(lines)
+            for line in lines:
+                print(line)
+                print(line.startswith("- "))
+                if not line.startswith("- "):
+                    return BlockType.PARAGRAPH
             return BlockType.UNORDERED_LIST
         case "1":
-            num_start = str(block).find("1. ")
-            if num_start == 0:
-                return BlockType.ORDERED_LIST
-            return BlockType.PARAGRAPH
+            block = block.strip()
+            lines = str(block).split("\n")
+            for i in range(len(lines)):
+                if not lines[i].startswith(f"{i+1}."):
+                    return BlockType.PARAGRAPH
+            return BlockType.ORDERED_LIST
         case _:
+            print("ELSE CASE HIT")
             return BlockType.PARAGRAPH
 
 
@@ -75,7 +172,7 @@ def text_to_textnodes(text):
     )
     split_images = split_nodes_image(split_code)
     split_urls = split_nodes_link(split_images)
-    print(f"final result:\n{split_urls}")
+    print(f"FINAL SPLIT:\n{split_urls}")
     return split_urls
 
 

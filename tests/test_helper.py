@@ -10,6 +10,7 @@ from node_helper import (
     text_to_textnodes,
     markdown_to_blocks,
     block_to_block_type,
+    markdown_to_html_node,
 )
 
 
@@ -432,3 +433,126 @@ lines with `code` and **bold**."""
         block_type = block_to_block_type(block)
         print(block_type)
         self.assertEqual(block_type, BlockType.ORDERED_LIST)
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        print(f"testprintHTML: {html}")
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+    """
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
+
+    def test_heading_h1(self):
+        md = "# Title One"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>Title One</h1></div>",
+        )
+
+    def test_paragraph_collapses_single_newlines(self):
+        md = "First line\nsecond line\nthird line"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><p>First line second line third line</p></div>",
+        )
+
+    # 3) Heading level 6 (upper bound)
+    def test_heading_h6(self):
+        md = "###### Tiny Title"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><h6>Tiny Title</h6></div>",
+        )
+
+    # 4) Heading-like but missing space => paragraph (per spec “# + space”)
+    def test_heading_missing_space_is_paragraph(self):
+        md = "##Not a heading"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><p>##Not a heading</p></div>",
+        )
+
+    # 5) Quote: every line must start with '>' and ends up in a single blockquote
+    def test_quote_multiline(self):
+        md = "> line one\n> line two\n> line three"
+        html = markdown_to_html_node(md).to_html()
+        # common simple rendering: wrap joined lines in a single paragraph inside blockquote
+        self.assertEqual(
+            html,
+            "<div><blockquote><p>line one line two line three</p></blockquote></div>",
+        )
+
+    # 6) Unordered list: each line starts with "- " => <ul><li>..</li>...</ul>
+    def test_unordered_list_basic(self):
+        md = "- apples\n- bananas\n- cherries"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><ul><li>apples</li><li>bananas</li><li>cherries</li></ul></div>",
+        )
+
+    # 7) Ordered list: must start at 1 and increment by 1
+    def test_ordered_list_incrementing(self):
+        md = "1. step one\n2. step two\n3. step three"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><ol><li>step one</li><li>step two</li><li>step three</li></ol></div>",
+        )
+
+    # 8) Ordered list that does NOT increment properly: treat as paragraph (per spec)
+    def test_ordered_list_bad_numbering_falls_back_to_paragraph(self):
+        md = "1. first\n3. third"
+        html = markdown_to_html_node(md).to_html()
+        # no blank line separator => single paragraph, with internal \n collapsed to space
+        self.assertEqual(
+            html,
+            "<div><p>1. first 3. third</p></div>",
+        )
+
+    # 9) Code block preserves literal text (including inline MD) and newlines
+    # def test_codeblock_preserves_inline_and_newlines(self):
+    # md = """
+    # 10) Code block with leading empty lines around should still be detected and preserved
+    def test_codeblock_with_leading_trailing_space(self):
+        md = "\n```\nline A\nline B\n```\n"
+        html = markdown_to_html_node(md).to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>line A\nline B\n</code></pre></div>",
+        )
+
+    # 11) Paragraph with unmatched inline delimiter should raise (your splitter’s rule)
+    def test_paragraph_unmatched_bold_raises(self):
+        md = "This **never closes"
+        with self.assertRaises(Exception):
+            markdown_to_html_node(md)
