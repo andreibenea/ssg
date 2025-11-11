@@ -1,8 +1,8 @@
 import unittest
 
-from textnode import TextNode, TextType
-from node_helper import BlockType
-from node_helper import (
+from src.textnode import TextNode, TextType
+from src.node_helper import BlockType
+from src.node_helper import (
     extract_markdown_links,
     extract_markdown_images,
     split_nodes_image,
@@ -556,3 +556,32 @@ the **same** even with inline stuff
         md = "This **never closes"
         with self.assertRaises(Exception):
             markdown_to_html_node(md)
+
+    def test_list_item_inline_link(self):
+        md = "- Read [Boot.dev](https://www.boot.dev)"
+        html = markdown_to_html_node(md).to_html()
+        assert (
+            html
+            == '<div><ul><li>Read <a href="https://www.boot.dev">Boot.dev</a></li></ul></div>'
+        )
+
+    def test_list_item_inline_italic(self):
+        md = "- Disney _didn't ruin it_"
+        html = markdown_to_html_node(md).to_html()
+        assert html == "<div><ul><li>Disney <i>didn't ruin it</i></li></ul></div>"
+
+    def test_quote_no_stray_caret(self):
+        md = '> "A quote."\n>\n> -- Author'
+        html = markdown_to_html_node(md).to_html()
+        assert html == '<div><blockquote><p>"A quote." -- Author</p></blockquote></div>'
+
+    def test_quote_with_inline_formatting(self):
+        md = "> This is a *quote* with **bold**, `code`, and a [link](https://example.com)."
+        html = markdown_to_html_node(md).to_html()
+        assert html == (
+            "<div><blockquote><p>"
+            "This is a *quote* with <b>bold</b>, "
+            "<code>code</code>, and a "
+            '<a href="https://example.com">link</a>.'
+            "</p></blockquote></div>"
+        )

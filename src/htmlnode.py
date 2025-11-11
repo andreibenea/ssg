@@ -20,24 +20,29 @@ class HTMLNode:
 
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag, value, children = None, props=None):
+    VOID_TAGS = {"img", "br", "hr", "input", "meta", "link"}
+
+    def __init__(self, tag, value, children=None, props=None):
         super().__init__(tag, value, children, props)
         self.children = None
 
     def to_html(self):
-        if self.value == None:
-            raise ValueError("all leafs must have value")
-        if self.tag == None:
-            return f"{self.value}"
-        else:
-            return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        if self.tag is None:
+            if self.value is None:
+                raise ValueError("all leafs must have value")
+            return self.value
+        if self.tag in self.VOID_TAGS:
+            return f"<{self.tag}{self.props_to_html()}>"
+        if self.value is None:
+            raise ValueError(f"Leaf node '{self.tag}' missing value")
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
 
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, value=None, props=None):
         super().__init__(tag, value, children, props)
         self.value = None
-    
+
     def to_html(self):
         if self.tag == None:
             raise ValueError("all parents must have tags")

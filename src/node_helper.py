@@ -1,8 +1,8 @@
-from enum import Enum
 import re
-from textnode import TextNode, TextType
-from htmlnode import HTMLNode, ParentNode, LeafNode
-from convert_txt_to_html import text_node_to_html_node
+from enum import Enum
+from src.textnode import TextNode, TextType
+from src.htmlnode import HTMLNode, ParentNode, LeafNode
+from src.convert_txt_to_html import text_node_to_html_node
 
 
 class Delimiters(Enum):
@@ -36,7 +36,6 @@ def markdown_to_html_node(markdown):
             new_node = ParentNode("pre", [html_node])
             all_nodes.append(new_node)
         else:
-            # block = block.replace("\n", " ")
             nodes_in_block = text_to_textnodes(block)
             child_nodes = []
             for node in nodes_in_block:
@@ -48,7 +47,10 @@ def markdown_to_html_node(markdown):
                 case BlockType.PARAGRAPH:
                     for child in child_nodes:
                         print(f"CHILD: {child}")
-                        child.value = child.value.replace("\n", " ")
+                        if getattr(child, "tag", None) is None and isinstance(
+                            child.value, str
+                        ):
+                            child.value = child.value.replace("\n", " ")
                     new_node = ParentNode("p", child_nodes)
                     print(f"RETURNING HTMLNODE: {new_node}")
                     print(f"TOHTML{new_node.to_html()}")
@@ -68,9 +70,22 @@ def markdown_to_html_node(markdown):
                     all_nodes.append(new_node)
                 case BlockType.QUOTE:
                     print("FOUND QUOTE TYPE")
-                    for child in child_nodes:
-                        child.value = (child.value.replace("> ", "")).replace("\n", " ")
-                    p_node = ParentNode("p", child_nodes)
+                    lines = str(block).splitlines()
+                    clean_lines = []
+                    for line in lines:
+                        line = line.strip()
+                        if line.startswith(">"):
+                            line = line[1:]
+                            if line.startswith(" "):
+                                line = line[1:]
+                        if len(line) == 0:
+                            continue
+                        clean_lines.append(line)
+                    print(f"CLEAN LINES: {clean_lines}")
+                    joined_nodes = " ".join(clean_lines)
+                    print(f"JOINED NODES: {joined_nodes}")
+                    quote_children = [text_node_to_html_node(node) for node in text_to_textnodes(joined_nodes)]
+                    p_node = ParentNode("p", quote_children)
                     new_node = ParentNode("blockquote", [p_node])
                     all_nodes.append(new_node)
                 case BlockType.ORDERED_LIST:
@@ -78,24 +93,32 @@ def markdown_to_html_node(markdown):
                     lines = str(block).splitlines()
                     child_nodes = []
                     for i in range(len(lines)):
+                        prefix = f"{i + 1}. "
                         if len(lines[i]) == 0:
                             continue
-                        line = LeafNode("li", lines[i][2:].strip())
-                        child_nodes.append(line)
+                        if lines[i].startswith(prefix):
+                            line_text = lines[i][len(prefix):].strip()
+                            line_children = [text_node_to_html_node(n) for n in text_to_textnodes(line_text)]
+                            child_nodes.append(ParentNode("li", line_children))
                     new_node = ParentNode("ol", child_nodes)
                     all_nodes.append(new_node)
 
                 case BlockType.UNORDERED_LIST:
                     print("FOUND UNORDERED LIST TYPE")
                     print(f"UL block: {block}")
-                    lines = str(block).split("- ")
+                    lines = str(block).splitlines()
                     print(f"UL LINES: {lines}")
                     child_nodes = []
                     for line in lines:
                         if len(line) == 0:
                             continue
-                        line = LeafNode("li", line.strip())
-                        child_nodes.append(line)
+                        if str(line).startswith("- "):
+                            line_txt = line[2:].strip()
+                            line_children = [
+                                text_node_to_html_node(n)
+                                for n in text_to_textnodes(line_txt)
+                            ]
+                            child_nodes.append(ParentNode("li", line_children))
                     new_node = ParentNode("ul", child_nodes)
                     all_nodes.append(new_node)
 

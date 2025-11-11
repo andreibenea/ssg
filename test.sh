@@ -1,4 +1,5 @@
-PYTHONPATH=src python3 -m unittest discover -v -s tests
+python3 -m unittest discover -v -s tests
+# PYTHONPATH=src python3 -m unittest discover -v -s tests
 # PYTHONPATH=src python3 -m unittest tests/test_helper.py -v
 # PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_paragraphs -v
 # PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_codeblock -v
@@ -7,3 +8,5 @@ PYTHONPATH=src python3 -m unittest discover -v -s tests
 # PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_unordered_list_basic -v
 # PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_block_to_block_type_unordered_list -v
 # PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_ordered_list_incrementing -v
+# PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_quote_no_stray_caret -v
+# PYTHONPATH=src python3 -m unittest tests.test_helper.TestHelper.test_quote_with_inline_formatting -v
