@@ -508,7 +508,7 @@ the **same** even with inline stuff
         # common simple rendering: wrap joined lines in a single paragraph inside blockquote
         self.assertEqual(
             html,
-            "<div><blockquote><p>line one line two line three</p></blockquote></div>",
+            "<div><blockquote>line one line two line three</blockquote></div>",
         )
 
     # 6) Unordered list: each line starts with "- " => <ul><li>..</li>...</ul>
@@ -573,15 +573,15 @@ the **same** even with inline stuff
     def test_quote_no_stray_caret(self):
         md = '> "A quote."\n>\n> -- Author'
         html = markdown_to_html_node(md).to_html()
-        assert html == '<div><blockquote><p>"A quote." -- Author</p></blockquote></div>'
+        assert html == '<div><blockquote>"A quote." -- Author</blockquote></div>'
 
     def test_quote_with_inline_formatting(self):
         md = "> This is a *quote* with **bold**, `code`, and a [link](https://example.com)."
         html = markdown_to_html_node(md).to_html()
         assert html == (
-            "<div><blockquote><p>"
+            "<div><blockquote>"
             "This is a *quote* with <b>bold</b>, "
             "<code>code</code>, and a "
             '<a href="https://example.com">link</a>.'
-            "</p></blockquote></div>"
+            "</blockquote></div>"
         )

@@ -23,7 +23,9 @@ def generate_page(from_path, template_path, dest_path):
     print(f"HTMLSTR: {html_string}")
     page_title = extract_title(from_file_content)
     print(f"PAGE TITLE: {page_title}")
-    template_file_content = (template_file_content.replace("{{ Title }}", page_title)).replace("{{ Content }}", html_string)
+    template_file_content = (
+        template_file_content.replace("{{ Title }}", page_title)
+    ).replace("{{ Content }}", html_string)
     print(template_file_content)
     with open(f"{dest_path}", "w") as main_html_page:
         main_html_page.write(template_file_content)
@@ -59,11 +61,29 @@ def extract_title(markdown):
     raise Exception
 
 
+def get_file_paths(base_path):
+    paths = []
+    content_folder = os.listdir(base_path)
+    for item in content_folder:
+        new_path = os.path.join(base_path, item)
+        if os.path.isdir(new_path):
+            result = get_file_paths(new_path)
+            paths.extend(result)
+    if os.path.isfile(new_path):
+        paths.append(new_path)
+    return paths
+
+
 def main():
     generate_public()
-    with open("content/index.md", "r") as file:
-        content = file.read()
-    generate_page("./content/index.md", "./template.html", "./public/index.html")
+    file_paths = get_file_paths("content")
+    print(file_paths)
+    for path in file_paths:
+        left, right = str(path).split("/", 1)
+        public_path = (os.path.join("public", right)).replace(".md", ".html")
+        print(public_path)
+        os.makedirs(os.path.dirname(public_path), exist_ok=True)
+        generate_page(path, "./template.html", public_path)
 
 
 if __name__ == "__main__":

@@ -85,8 +85,8 @@ def markdown_to_html_node(markdown):
                     joined_nodes = " ".join(clean_lines)
                     print(f"JOINED NODES: {joined_nodes}")
                     quote_children = [text_node_to_html_node(node) for node in text_to_textnodes(joined_nodes)]
-                    p_node = ParentNode("p", quote_children)
-                    new_node = ParentNode("blockquote", [p_node])
+                    # p_node = ParentNode("p", quote_children)
+                    new_node = ParentNode("blockquote", quote_children)
                     all_nodes.append(new_node)
                 case BlockType.ORDERED_LIST:
                     print("FOUND ORDERED LIST TYPE")
@@ -207,10 +207,11 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         print(f"set delimiter: {delimiter}")
         if node.text.count(delimiter) % 2 != 0:
             raise Exception("invalid markdown syntax")
-        if node.text[0] == delimiter or node.text[0:1] == delimiter:
-            special_flag = True
-        else:
-            special_flag = False
+        # if len(node.text) > 1:
+        #     if node.text[0] == delimiter or node.text[0:1] == delimiter:
+        #         special_flag = True
+        #     else:
+        #         special_flag = False
         if node.text_type != TextType.TEXT:
             print(f"node type not text..adding node as is")
             new_nodes.extend([node])
@@ -218,19 +219,26 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             print(f"node text to split: {node.text}")
             slices = node.text.split(delimiter)
             print(f"text slices: {slices}")
+            i = 0
             for slice in slices:
-                if special_flag:
+                if slice == "":
+                    i += 1
+                    continue
+                if i % 2 != 0:
+                # if special_flag:
                     new_node = TextNode(slice, text_type)
                     new_nodes.extend([new_node])
-                    special_flag = not special_flag
+                    # special_flag = not special_flag
                     print(f"added {new_node}")
-                    print(f"special flag now: {special_flag}")
-                elif not special_flag and slice != "":
+                    # print(f"special flag now: {special_flag}")
+                elif i % 2 == 0:
+                # elif not special_flag and slice != "":
                     new_node = TextNode(slice, node.text_type)
                     new_nodes.extend([new_node])
-                    special_flag = not special_flag
+                    # special_flag = not special_flag
                     print(f"added {new_node}")
-                    print(f"special flag now: {special_flag}")
+                    # print(f"special flag now: {special_flag}")
+                i += 1
 
     print(f"delimiter output:\n{new_nodes}")
     return new_nodes
