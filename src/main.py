@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from src import node_helper
 
 
@@ -9,9 +10,16 @@ def generate_public():
         print("PATH EXISTS... removing")
         shutil.rmtree(public)
     copy_static("./static", "./public")
+    
+def generate_docs():
+    docs = "./docs"
+    if os.path.exists(docs):
+        print("PATH EXISTS... removing")
+        shutil.rmtree(docs)
+    copy_static("./static", "./docs")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path, "r") as from_file:
         from_file_content = from_file.read()
@@ -24,8 +32,12 @@ def generate_page(from_path, template_path, dest_path):
     page_title = extract_title(from_file_content)
     print(f"PAGE TITLE: {page_title}")
     template_file_content = (
-        template_file_content.replace("{{ Title }}", page_title)
-    ).replace("{{ Content }}", html_string)
+        (
+            (template_file_content.replace("{{ Title }}", page_title)).replace(
+                "{{ Content }}", html_string
+            )
+        ).replace('href="/', f'href="{base_path}')
+    ).replace('src="/', f"src={base_path}")
     print(template_file_content)
     with open(f"{dest_path}", "w") as main_html_page:
         main_html_page.write(template_file_content)
@@ -75,15 +87,32 @@ def get_file_paths(base_path):
 
 
 def main():
-    generate_public()
+    print(f"argv: {sys.argv}")
+    if len(sys.argv) > 1:
+        base_path = sys.argv[1]
+    else:
+        base_path = "/"
+    
+    ###### LOCAL ENV generate public folder #######
+    # generate_public()
+    
+    ###### PRODUCTION ENV generate docs folder #######
+    generate_docs()
+    
     file_paths = get_file_paths("content")
     print(file_paths)
     for path in file_paths:
         left, right = str(path).split("/", 1)
-        public_path = (os.path.join("public", right)).replace(".md", ".html")
-        print(public_path)
-        os.makedirs(os.path.dirname(public_path), exist_ok=True)
-        generate_page(path, "./template.html", public_path)
+        
+        ###### LOCAL ENV generate public #######
+        # public_path = (os.path.join("public", right)).replace(".md", ".html")
+        # print(public_path)
+        
+        ###### PRODUCTION ENV generate docs #######
+        docs_path = (os.path.join("docs", right)).replace(".md", ".html")
+        print(docs_path)
+        os.makedirs(os.path.dirname(docs_path), exist_ok=True)
+        generate_page(path, "./template.html", docs_path, base_path)
 
 
 if __name__ == "__main__":
